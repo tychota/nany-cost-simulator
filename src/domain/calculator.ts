@@ -4,11 +4,13 @@ import {
   EMPLOYER_SOCIAL_RATE,
   HEALTH_CONTRIBUTION_RATE,
   HEALTH_CONTRIBUTION_CAP,
-  HOURS_PER_YEAR,
+  WEEKS_PER_YEAR,
   MONTHS_PER_YEAR,
   CMG_HOURLY_CAP,
   CMG_COTIS_RATE,
   CMG_REFERENCE_HOURLY_COST,
+  CMG_MIN_MONTHLY_RESOURCES,
+  CMG_MAX_MONTHLY_RESOURCES,
   computeTaxCreditCap,
   getEffortRate,
 } from "./constants";
@@ -31,7 +33,7 @@ export function computeHoursBreakdown(weeklyHours: number): HoursBreakdown {
   const weeklyPlus25 = Math.min(Math.max(weeklyHours - 40, 0), 8);
   const weeklyPlus50 = Math.min(Math.max(weeklyHours - 48, 0), 2);
 
-  const factor = HOURS_PER_YEAR / MONTHS_PER_YEAR;
+  const factor = WEEKS_PER_YEAR / MONTHS_PER_YEAR;
 
   const monthlyNormal = Math.ceil(weeklyNormal * factor);
   const monthlyPlus25 = Math.ceil(weeklyPlus25 * factor);
@@ -100,7 +102,11 @@ function computeFamilyResult(
   const eligibleHourlyCost = Math.min(netHourlyWage, CMG_HOURLY_CAP);
   const eligibleGuardCost = eligibleHourlyCost * monthlyHoursShare;
 
-  const monthlyResourcesCAF = family.taxableIncome / 12;
+  const monthlyResourcesCAF = clamp(
+    family.taxableIncome / 12,
+    CMG_MIN_MONTHLY_RESOURCES,
+    CMG_MAX_MONTHLY_RESOURCES
+  );
   const effortRate = getEffortRate(family.childrenCount);
 
   const cmgRemuTheoretical =

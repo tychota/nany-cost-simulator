@@ -5,24 +5,25 @@ import { FamilyInput, SimulationInputs } from "./types";
  */
 
 // Temps
-export const HOURS_PER_YEAR = 52;
+export const WEEKS_PER_YEAR = 52; // 52 semaines de référence pour la mensualisation
 export const MONTHS_PER_YEAR = 12;
 
 // Garde partagée / conventions
 export const MAX_WEEKLY_HOURS = 50;
 
 // URSSAF – taux officiels 2025
-export const EMPLOYER_SOCIAL_RATE = 0.45; // % cotisations patronales sur le brut (approximatif, varie selon plafonds)
-export const EMPLOYEE_SOCIAL_RATE = 0.2188; // % cotisations salariales sur le brut (21,88% en 2025)
-export const EMPLOYER_SOCIAL_DEDUCTION_PER_HOUR = 2; // déduction forfaitaire emploi à domicile (€/h)
-export const HEALTH_CONTRIBUTION_RATE = 0.027; // contribution santé au travail (2,7% plafonné à 5€/bulletin)
+export const EMPLOYER_SOCIAL_RATE = 0.474; // ≈47,4 % en additionnant les lignes patronales du tableau Parent Employeur Zen (mise à jour 01/2025)
+export const EMPLOYEE_SOCIAL_RATE = 0.2205; // ≈22,05 % d'après les lignes salariales hors Alsace-Moselle
+export const EMPLOYER_SOCIAL_DEDUCTION_PER_HOUR = 2; // Déduction forfaitaire (économie.gouv.fr)
+export const HEALTH_CONTRIBUTION_RATE = 0.027; // contribution santé au travail (2,7 %)
 export const HEALTH_CONTRIBUTION_CAP = 5; // plafond mensuel contribution santé au travail (€)
 
-// CMG – paramètres 2025 (simplifiés)
-export const CMG_HOURLY_CAP = 15; // plafond horaire nounou à domicile
-export const CMG_REFERENCE_HOURLY_COST = 10.38; // coût horaire de référence
-// Plafond cotisations CMG – simplifié: pas de plafond mensuel, juste 50%
-export const CMG_COTIS_RATE = 0.5;
+// CMG – paramètres 2025 (décret 2025-515 & communiqués CAF)
+export const CMG_HOURLY_CAP = 15; // plafond horaire nounou à domicile (CAF)
+export const CMG_REFERENCE_HOURLY_COST = 10.38; // coût horaire de référence 2025
+export const CMG_COTIS_RATE = 0.5; // 50% de prise en charge des cotisations sociales
+export const CMG_MIN_MONTHLY_RESOURCES = 635; // plancher mensuel encadrant le RFR
+export const CMG_MAX_MONTHLY_RESOURCES = 8500; // plafond mensuel encadrant le RFR
 
 // Crédit d'impôt emploi à domicile
 export const TAX_CREDIT_BASE_CAP = 12000;
