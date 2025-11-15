@@ -300,33 +300,19 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
                               />
                             </Stack>
                           </SimpleGrid>
-                          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                            <Stack gap={4}>
-                              <Switch
-                                label="Parent isolé"
-                                description="Donne droit à un CMG jusqu'aux 12 ans de l'enfant."
-                                checked={fam.singleParent}
-                                onChange={(event) =>
-                                  updateFamily(index, {
-                                    singleParent: event.currentTarget.checked,
-                                  })
-                                }
-                              />
-                            </Stack>
-                            <Stack gap={4}>
-                              <Switch
-                                label="1re année d'emploi à domicile"
-                                description="Majore le plafond du crédit d'impôt à 15 000 € (18 000 € max)."
-                                checked={fam.firstYearEmployment}
-                                onChange={(event) =>
-                                  updateFamily(index, {
-                                    firstYearEmployment:
-                                      event.currentTarget.checked,
-                                  })
-                                }
-                              />
-                            </Stack>
-                          </SimpleGrid>
+                          <Stack gap={4}>
+                            <Switch
+                              label="1re année d'emploi à domicile"
+                              description="Majore le plafond du crédit d'impôt à 15 000 € (18 000 € max)."
+                              checked={fam.firstYearEmployment}
+                              onChange={(event) =>
+                                updateFamily(index, {
+                                  firstYearEmployment:
+                                    event.currentTarget.checked,
+                                })
+                              }
+                            />
+                          </Stack>
                         </Stack>
                       </Accordion.Panel>
                     </Accordion.Item>
