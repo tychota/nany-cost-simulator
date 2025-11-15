@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { AppShell, Container, Group, Title, Text, Anchor } from "@mantine/core";
 import { Layout } from "./components/Layout";
 import { InputsForm } from "./components/InputsForm";
@@ -6,10 +6,11 @@ import { ResultsSidebar } from "./components/ResultsSidebar";
 import { DEFAULT_INPUTS } from "./domain/constants";
 import { SimulationInputs } from "./domain/types";
 import { computeSimulation } from "./domain/calculator";
+import { usePersistedInputs } from "./state/usePersistedInputs";
 import { ReferenceSection } from "./components/Reference";
 
 function App() {
-  const [inputs, setInputs] = useState<SimulationInputs>(DEFAULT_INPUTS);
+  const [inputs, setInputs] = usePersistedInputs();
 
   const result = useMemo(() => computeSimulation(inputs), [inputs]);
 
