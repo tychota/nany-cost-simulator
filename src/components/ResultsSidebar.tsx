@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Accordion,
+  Alert,
   Anchor,
   Badge,
   Group,
@@ -12,16 +13,15 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { SimulationInputs, SimulationResult } from "../domain/types";
+import { SimulationResult } from "../domain/types";
 import {
   formatCurrencyDetailed,
   formatHours,
   formatPercent,
 } from "../domain/format";
-import { EMPLOYEE_SOCIAL_RATE } from "../domain/constants";
+import { EMPLOYEE_SOCIAL_RATE, EMPLOYER_SOCIAL_RATE } from "../domain/constants";
 
 interface ResultsSidebarProps {
-  inputs: SimulationInputs;
   result: SimulationResult;
 }
 
@@ -35,68 +35,87 @@ const references = [
   },
   {
     id: "caf",
-    label: "CAF - Réforme du CMG (FAQ)",
+    label: "CAF – Réforme du CMG (FAQ)",
     description:
-      "Confirme que 50 % des cotisations patronales sont prises en charge pour une garde à domicile et rappelle le plafond horaire CAF.",
+      "Précise que 50 % des cotisations patronales sont prises en charge pour une garde à domicile.",
     url: "https://www.caf.fr/allocataires/actualites/actualites-nationales/reforme-du-cmg-la-foire-aux-questions",
   },
   {
     id: "mensu",
-    label: "Droit-Finances - Mensualisation",
+    label: "Droit-Finances – Mensualisation 52/12",
     description:
-      "La mensualisation se fait sur 52 semaines divisées par 12 mois pour les gardes en année complète.",
+      "Rappelle la mensualisation heures semaine × 52 ÷ 12 pour les gardes en année complète.",
     url: "https://droit-finances.commentcamarche.com/salaries/guide-salaries/1551-salaire-d-une-assistante-maternelle-taux-horaire-et-indemnites",
   },
   {
     id: "cotis",
-    label: "Parent Employeur Zen - Cotisations 2025",
+    label: "Parent Employeur Zen – Cotisations 2025",
     description:
-      "Tableau des taux 2025 (≈47,4 % patronal / 22 % salarial) et contribution santé au travail (2,7 % plafonnée à 5 €).",
+      "Tableau des taux 2025 (~22 % salarié / ~47 % employeur) et contribution santé au travail.",
     url: "https://parent-employeur-zen.com/actualites/garde-a-domicile-changements-2025",
   },
   {
     id: "credit",
-    label: "Service-Public - Crédit d'impôt",
+    label: "Service-Public – Crédit d'impôt 50 %",
     description:
-      "Les dépenses d'emploi à domicile sont retenues à 50 % : 12 000 € + majorations (15 000 € la première année, 18 000 € max).",
+      "Décrit les plafonds (12 000 € + majorations ou 18 000 € la 1re année) pour l'emploi à domicile.",
     url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F12?lang=en",
   },
   {
     id: "deduction",
-    label: "Économie.gouv - Emploi à domicile",
+    label: "Économie.gouv – Déduction forfaitaire",
     description:
-      "Rappelle la déduction forfaitaire de 2 € par heure sur les cotisations des particuliers employeurs.",
+      "Confirme la déduction de 2 € par heure travaillée sur les cotisations patronales.",
     url: "https://www.economie.gouv.fr/emploi-domicile-ce-quil-faut-savoir-sur-le-statut-de-particulier-employeur",
   },
 ];
 
 export function ResultsSidebar({ result }: ResultsSidebarProps) {
+  const usesSyntheticSecondFamily = result.families.length === 1;
+
+  const familiesForDisplay = useMemo(() => {
+    if (!usesSyntheticSecondFamily) {
+      return result.families;
+    }
+    const first = result.families[0];
+    return [
+      first,
+      {
+        ...first,
+        family: {
+          ...first.family,
+          id: `${first.family.id}-mirror`,
+          label: "Famille 2 (identique par défaut)",
+        },
+      },
+    ];
+  }, [result.families, usesSyntheticSecondFamily]);
+
   const [familyTab, setFamilyTab] = useState(
-    result.families[0]?.family.id ?? ""
+    familiesForDisplay[0]?.family.id ?? ""
   );
 
   useEffect(() => {
-    if (!result.families.find((fam) => fam.family.id === familyTab)) {
-      setFamilyTab(result.families[0]?.family.id ?? "");
+    if (!familiesForDisplay.find((fam) => fam.family.id === familyTab)) {
+      setFamilyTab(familiesForDisplay[0]?.family.id ?? "");
     }
-  }, [familyTab, result.families]);
+  }, [familiesForDisplay, familyTab]);
 
   const activeFamily =
-    result.families.find((fam) => fam.family.id === familyTab) ??
-    result.families[0];
+    familiesForDisplay.find((fam) => fam.family.id === familyTab) ??
+    familiesForDisplay[0];
 
   const totalMonthlyCostAfterCMG = useMemo(
-    () => result.families.reduce((sum, fam) => sum + fam.monthlyCostAfterCMG, 0),
-    [result.families]
+    () => familiesForDisplay.reduce((sum, fam) => sum + fam.monthlyCostAfterCMG, 0),
+    [familiesForDisplay]
   );
-
   const totalMonthlyCostAfterTax = useMemo(
     () =>
-      result.families.reduce(
+      familiesForDisplay.reduce(
         (sum, fam) => sum + fam.monthlyCostAfterTaxCredit,
         0
       ),
-    [result.families]
+    [familiesForDisplay]
   );
 
   return (
@@ -104,80 +123,89 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
       <div>
         <Title order={4}>Résultats</Title>
         <Text size="sm" c="dimmed">
-          Synthèse interactive : choisis une famille pour voir sa part, puis
-          ouvre l'onglet « Mensualisation » pour comprendre la base de calcul.
+          Choisis un foyer pour détailler sa part, consulte les formules et les sources
+          officielles dans les onglets.
         </Text>
       </div>
 
-      <Tabs
-        defaultValue="synthese"
-        variant="pills"
-        radius="md"
-        keepMounted={false}
-      >
+      <Tabs defaultValue="synthese" variant="pills" keepMounted={false}>
         <Tabs.List grow>
           <Tabs.Tab value="synthese">Synthèse</Tabs.Tab>
           <Tabs.Tab value="mensualisation">Mensualisation</Tabs.Tab>
+          <Tabs.Tab value="formules">Formules</Tabs.Tab>
           <Tabs.Tab value="references">Références</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="synthese" pt="md">
           <Stack gap="md">
             <Paper withBorder radius="lg" p="md">
-              <Stack gap={6}>
-                <Group justify="space-between" align="flex-start">
+              <Stack gap="sm">
+                <Group justify="space-between">
                   <div>
-                    <Text size="sm" fw={500}>
-                      Nounou (contrat global)
-                    </Text>
+                    <Text fw={500}>Nounou (contrat global)</Text>
                     <Text size="xs" c="dimmed">
-                      Brut et net estimés à partir des cotisations 2025.
+                      Brut et net estimés avec les taux URSSAF 2025.
                     </Text>
                   </div>
                   <Badge variant="light" color="violet">
                     {formatHours(result.hours.monthlyTotal)} / mois
                   </Badge>
                 </Group>
-                <Text size="sm">
-                  Salaire mensuel brut : {" "}
-                  <Badge variant="light" size="sm">
-                    {formatCurrencyDetailed(result.totalGrossMonthly)}
-                  </Badge>
-                </Text>
-                <Text size="sm">
-                  Salaire mensuel net (≈ {formatPercent(EMPLOYEE_SOCIAL_RATE)}) :{" "}
-                  <Badge variant="light" size="sm">
-                    {formatCurrencyDetailed(result.totalNetMonthly)}
-                  </Badge>
-                </Text>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                  <StatCell
+                    label="Salaire mensuel brut"
+                    value={formatCurrencyDetailed(result.totalGrossMonthly)}
+                    hint="Inclut les majorations +25%/+50% au-delà de 40 h."
+                  />
+                  <StatCell
+                    label="Salaire mensuel net"
+                    value={formatCurrencyDetailed(result.totalNetMonthly)}
+                    hint={`Retenue salariale ≈ ${formatPercent(EMPLOYEE_SOCIAL_RATE)}.`}
+                  />
+                </SimpleGrid>
+                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+                  <StatCell
+                    label="Cotisations salariales"
+                    value={formatCurrencyDetailed(
+                      result.totalGrossMonthly * EMPLOYEE_SOCIAL_RATE
+                    )}
+                    hint="Retenues estimées (Parent Employeur Zen – cotisations 2025)."
+                  />
+                  <StatCell
+                    label="Cotisations employeur"
+                    value={formatCurrencyDetailed(
+                      result.totalGrossMonthly * EMPLOYER_SOCIAL_RATE
+                    )}
+                    hint="Inclut la contribution santé au travail plafonnée à 5 €."
+                  />
+                </SimpleGrid>
               </Stack>
             </Paper>
 
-            {activeFamily ? (
+            <Paper withBorder radius="lg" p="md">
               <Stack gap="xs">
                 <Group justify="space-between" align="center">
-                  <Text size="sm" fw={500}>
-                    Famille à détailler
-                  </Text>
-                  {result.families.length > 1 && (
-                    <SegmentedControl
-                      size="xs"
-                      value={activeFamily.family.id}
-                      onChange={setFamilyTab}
-                      data={result.families.map((fam) => ({
-                        label: fam.family.label,
-                        value: fam.family.id,
-                      }))}
-                    />
-                  )}
+                  <Text fw={500}>Famille à détailler</Text>
+                  <SegmentedControl
+                    size="xs"
+                    value={activeFamily?.family.id}
+                    onChange={setFamilyTab}
+                    data={familiesForDisplay.map((fam) => ({
+                      label: fam.family.label,
+                      value: fam.family.id,
+                    }))}
+                  />
                 </Group>
-                <FamilyCard fam={activeFamily} />
+                {usesSyntheticSecondFamily && (
+                  <Alert color="blue" variant="light">
+                    Aucun deuxième foyer n'est configuré : la Famille 2 reprend les
+                    mêmes données que la Famille 1. Ajoute une cofamille dans le
+                    formulaire pour personnaliser la répartition.
+                  </Alert>
+                )}
+                {activeFamily && <FamilyCard fam={activeFamily} />}
               </Stack>
-            ) : (
-              <Text size="sm" c="dimmed">
-                Ajoute une famille dans le formulaire pour voir une simulation.
-              </Text>
-            )}
+            </Paper>
 
             <Paper withBorder radius="lg" p="md">
               <Stack gap={4}>
@@ -185,13 +213,13 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
                   Coût total (toutes familles)
                 </Text>
                 <Text size="sm">
-                  Après CMG : {" "}
+                  Après CMG :{" "}
                   <Badge color="blue" variant="light">
                     {formatCurrencyDetailed(totalMonthlyCostAfterCMG)}
                   </Badge>
                 </Text>
                 <Text size="sm">
-                  Après CMG + crédit d'impôt (moyenne annuelle) : {" "}
+                  Après CMG + crédit d'impôt (moyenne annuelle) :{" "}
                   <Badge color="teal" variant="light">
                     {formatCurrencyDetailed(totalMonthlyCostAfterTax)}
                   </Badge>
@@ -205,11 +233,9 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
           <Paper withBorder radius="lg" p="md">
             <Stack gap="sm">
               <div>
-                <Text size="sm" fw={500}>
-                  Détail des heures mensualisées
-                </Text>
+                <Text fw={500}>Détail des heures mensualisées</Text>
                 <Text size="xs" c="dimmed">
-                  Basé sur la formule 52 semaines ÷ 12 mois (cf. Droit-Finances).
+                  Méthode année complète : heures hebdo × 52 ÷ 12.
                 </Text>
               </div>
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
@@ -217,44 +243,48 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
                   label="Heures normales"
                   weekly={result.hours.weeklyNormal}
                   monthly={result.hours.monthlyNormal}
-                  multiplier="× 52 ÷ 12"
                 />
                 <MensuLine
                   label="Heures majorées +25 %"
                   weekly={result.hours.weeklyPlus25}
                   monthly={result.hours.monthlyPlus25}
-                  multiplier="× 52 ÷ 12"
                 />
                 <MensuLine
                   label="Heures majorées +50 %"
                   weekly={result.hours.weeklyPlus50}
                   monthly={result.hours.monthlyPlus50}
-                  multiplier="× 52 ÷ 12"
                 />
                 <Stack gap={2}>
                   <Text size="sm" fw={500}>
-                    Total mensuel contractualisé
+                    Total contractualisé
                   </Text>
-                  <Badge color="violet" radius="sm">
-                    {formatHours(result.hours.monthlyTotal)} / mois
-                  </Badge>
+                  <Badge color="violet">{formatHours(result.hours.monthlyTotal)}</Badge>
                 </Stack>
-              </SimpleGrid>
-              <DividerWithLabel label="Cotisations et bases" />
-              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-                <MensuStat
-                  label="Brut estimé"
-                  value={formatCurrencyDetailed(result.totalGrossMonthly)}
-                  hint="Inclut les majorations 25% / 50%."
-                />
-                <MensuStat
-                  label="Net estimé"
-                  value={formatCurrencyDetailed(result.totalNetMonthly)}
-                  hint="Basé sur ≈22% de cotisations salariales."
-                />
               </SimpleGrid>
             </Stack>
           </Paper>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="formules" pt="md">
+          <Stack gap="md">
+            <Paper withBorder radius="lg" p="md">
+              <Text fw={500}>CMG (Décret 2025-515)</Text>
+              <Text size="sm">
+                Complément = coût mensuel éligible × (1 - revenus mensuels × taux
+                d'effort ÷ 10,38 €). Le coût est plafonné à 15 € nets/heure. Les
+                cotisations patronales sont prises en charge à 50 % après déduction de
+                2 €/h.
+              </Text>
+            </Paper>
+            <Paper withBorder radius="lg" p="md">
+              <Text fw={500}>Crédit d'impôt emploi à domicile (Service-Public)</Text>
+              <Text size="sm">
+                Crédit = 50 % des dépenses annuelles (nounou + autres emplois) après
+                déduction du CMG. Plafond de 12 000 € + 1 500 € par enfant (max 18 000 €
+                la 1re année d'emploi déclaré).
+              </Text>
+            </Paper>
+          </Stack>
         </Tabs.Panel>
 
         <Tabs.Panel value="references" pt="md">
@@ -267,13 +297,8 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
                   </Text>
                   <Text size="xs" c="dimmed">
                     {ref.description}{" "}
-                    <Anchor
-                      href={ref.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      size="xs"
-                    >
-                      Consulter la source
+                    <Anchor href={ref.url} target="_blank" rel="noreferrer" size="xs">
+                      Consulter
                     </Anchor>
                   </Text>
                 </Stack>
@@ -299,106 +324,85 @@ function FamilyCard({ fam }: FamilyCardProps) {
   const taxRatio =
     fam.monthlyCostAfterCMG === 0
       ? 0
-      : fam.annualTaxCredit / 12 / fam.monthlyCostAfterCMG;
+      : fam.annualTaxCreditNanny / 12 / fam.monthlyCostAfterCMG;
 
   return (
-    <Paper
-      withBorder
-      radius="lg"
-      p="md"
-      style={{ background: "rgba(248, 250, 252, 0.75)" }}
-    >
-      <Stack gap="xs">
-        <Group justify="space-between" align="center">
-          <div>
-            <Text size="sm" fw={500}>
-              {fam.family.label}
-            </Text>
-            <Text size="xs" c="dimmed">
-              Part de garde : {Math.round(fam.family.share * 100)} %
-            </Text>
-          </div>
-          <Badge size="sm" variant="light">
-            {formatCurrencyDetailed(fam.monthlyCostBeforeCMG)} brut
-          </Badge>
-        </Group>
-
-        <Text size="xs" c="dimmed">
-          Ressources mensuelles CAF estimées : {" "}
-          {formatCurrencyDetailed(fam.monthlyResourcesCAF)} (taux d'effort : {" "}
-          {formatPercent(fam.effortRate)}).
-        </Text>
-
-        <Accordion variant="contained" radius="md">
-          <Accordion.Item value="cmg">
-            <Accordion.Control>
-              <Text size="sm">
-                CMG mensuel : {" "}
-                <Badge variant="light" size="sm" color="blue">
-                  {formatCurrencyDetailed(fam.cmgTotal)}
-                </Badge>{" "}
-                <Text span size="xs" c="dimmed">
-                  ({formatPercent(cmgRatio)} du coût avant aides)
-                </Text>
-              </Text>
-            </Accordion.Control>
-            <Accordion.Panel>
-              <Stack gap={4}>
-                <Text size="xs" c="dimmed">
-                  Formule décret 2025-515 : coût éligible × [1 - revenus × taux
-                  d'effort ÷ 10,38 €].
-                </Text>
-                <Text size="xs">
-                  Part rémunération : {formatCurrencyDetailed(fam.cmgRemuneration)}
-                </Text>
-                <Text size="xs">
-                  Part cotisations (50 % max) : {formatCurrencyDetailed(fam.cmgCotisations)}
-                </Text>
-              </Stack>
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
-
-        <Text size="sm">
-          Coût mensuel après CMG : {" "}
-          <Badge variant="light" size="sm" color="blue">
-            {formatCurrencyDetailed(fam.monthlyCostAfterCMG)}
-          </Badge>
-        </Text>
-
-        <Accordion variant="contained" radius="md">
-          <Accordion.Item value="tax">
-            <Accordion.Control>
-              <Text size="sm">
-                Crédit d'impôt annuel : {" "}
-                <Badge size="sm" variant="light" color="teal">
-                  {formatCurrencyDetailed(fam.annualTaxCredit)}
-                </Badge>{" "}
-                <Text span size="xs" c="dimmed">
-                  (~{formatCurrencyDetailed(fam.annualTaxCredit / 12)} / mois)
-                </Text>
-              </Text>
-            </Accordion.Control>
-            <Accordion.Panel>
+    <Stack gap="sm">
+      <Paper withBorder radius="md" p="md" style={{ background: "rgba(248,250,252,0.85)" }}>
+        <Stack gap={6}>
+          <Group justify="space-between">
+            <div>
+              <Text fw={500}>{fam.family.label}</Text>
               <Text size="xs" c="dimmed">
-                Service-Public : 50 % des dépenses nettes d'aides, plafonnées à
-                12 000 € + majorations (15 000 € la 1ʳᵉ année).
+                Part de garde : {Math.round(fam.family.share * 100)} %
               </Text>
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
-
-        <Text size="sm" fw={500}>
-          Coût mensuel après CMG + crédit d'impôt : {" "}
-          <Badge size="sm" variant="filled" color="teal">
-            {formatCurrencyDetailed(fam.monthlyCostAfterTaxCredit)}
-          </Badge>{" "}
-          <Text span size="xs" c="dimmed">
-            ({formatPercent(taxRatio)} du coût net est compensé par le crédit)
+            </div>
+            <Badge size="sm" variant="light">
+              {formatCurrencyDetailed(fam.monthlyCostBeforeCMG)} brut
+            </Badge>
+          </Group>
+          <Text size="xs" c="dimmed">
+            Revenus mensuels pris en compte :{" "}
+            {formatCurrencyDetailed(fam.monthlyResourcesCAF)} – taux d&apos;effort{" "}
+            {formatPercent(fam.effortRate)}.
           </Text>
-        </Text>
-      </Stack>
-    </Paper>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+            <StatCell
+              label="CMG total"
+              value={formatCurrencyDetailed(fam.cmgTotal)}
+              hint={`${formatPercent(cmgRatio)} du coût avant aides`}
+            />
+            <StatCell
+              label="Coût après CMG"
+              value={formatCurrencyDetailed(fam.monthlyCostAfterCMG)}
+            />
+            <StatCell
+              label="Crédit d'impôt (part nounou)"
+              value={formatCurrencyDetailed(fam.annualTaxCreditNanny)}
+              hint={`≈ ${formatCurrencyDetailed(
+                fam.annualTaxCreditNanny / 12
+              )} / mois · Crédit foyer total : ${formatCurrencyDetailed(
+                fam.annualTaxCreditTotal
+              )}`}
+            />
+            <StatCell
+              label="Coût après CMG + crédit"
+              value={formatCurrencyDetailed(fam.monthlyCostAfterTaxCredit)}
+              hint={`${formatPercent(taxRatio)} du coût net compensé`}
+            />
+          </SimpleGrid>
+          <Text size="xs" c="dimmed">
+            Dépenses prises en compte : {formatCurrencyDetailed(fam.annualNannyNetExpenses)} pour la nounou et{" "}
+            {formatCurrencyDetailed(
+              Math.max(0, fam.annualEligibleExpensesTotal - fam.annualNannyNetExpenses)
+            )} pour les autres emplois déclarés (total {formatCurrencyDetailed(fam.annualEligibleExpensesTotal)}
+            , crédit global plafonné à {formatCurrencyDetailed(fam.annualTaxCreditTotal * 2)}).
+          </Text>
+        </Stack>
+      </Paper>
+
+      <Accordion variant="contained" radius="md">
+        <Accordion.Item value="cmg-details">
+          <Accordion.Control>Comprendre le calcul</Accordion.Control>
+          <Accordion.Panel>
+            <Stack gap={4}>
+              <Text size="xs">
+                Part rémunération : {formatCurrencyDetailed(fam.cmgRemuneration)} = coût
+                éligible × (1 - revenus × taux d&apos;effort ÷ 10,38 €).
+              </Text>
+              <Text size="xs">
+                Part cotisations : {formatCurrencyDetailed(fam.cmgCotisations)} = 50 % des
+                cotisations patronales restantes après la déduction de 2 €/h.
+              </Text>
+              <Text size="xs">
+                Crédit d'impôt : 50 % des dépenses nettes d'aides, plafonné selon la
+                situation du foyer.
+              </Text>
+            </Stack>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </Stack>
   );
 }
 
@@ -406,10 +410,9 @@ interface MensuLineProps {
   label: string;
   weekly: number;
   monthly: number;
-  multiplier: string;
 }
 
-function MensuLine({ label, weekly, monthly, multiplier }: MensuLineProps) {
+function MensuLine({ label, weekly, monthly }: MensuLineProps) {
   return (
     <Stack gap={2}>
       <Text size="sm" fw={500}>
@@ -417,49 +420,35 @@ function MensuLine({ label, weekly, monthly, multiplier }: MensuLineProps) {
       </Text>
       {weekly === 0 ? (
         <Text size="xs" c="dimmed">
-          Non concerné sur cette plage.
+          Non concerné.
         </Text>
       ) : (
         <Text size="xs">
-          {formatHours(weekly)} / sem {multiplier} = {formatHours(monthly)} / mois
+          {formatHours(weekly)} / sem × 52 ÷ 12 = {formatHours(monthly)} / mois
         </Text>
       )}
     </Stack>
   );
 }
 
-interface MensuStatProps {
+interface StatCellProps {
   label: string;
   value: string;
   hint?: string;
 }
 
-function MensuStat({ label, value, hint }: MensuStatProps) {
+function StatCell({ label, value, hint }: StatCellProps) {
   return (
-    <Stack gap={2}>
-      <Text size="sm" fw={500}>
+    <Paper radius="md" withBorder p="sm">
+      <Text size="xs" c="dimmed">
         {label}
       </Text>
-      <Badge variant="light" radius="sm">
-        {value}
-      </Badge>
+      <Text fw={600}>{value}</Text>
       {hint && (
         <Text size="xs" c="dimmed">
           {hint}
         </Text>
       )}
-    </Stack>
-  );
-}
-
-function DividerWithLabel({ label }: { label: string }) {
-  return (
-    <Group gap="xs" align="center" mt="sm">
-      <div style={{ height: 1, flex: 1, background: "var(--mantine-color-gray-3)" }} />
-      <Text size="xs" c="dimmed" fw={500}>
-        {label}
-      </Text>
-      <div style={{ height: 1, flex: 1, background: "var(--mantine-color-gray-3)" }} />
-    </Group>
+    </Paper>
   );
 }

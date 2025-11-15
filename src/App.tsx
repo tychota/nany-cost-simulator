@@ -23,37 +23,33 @@ function App() {
       }}
     >
       <AppShell.Header>
-        <Container h="100%" size="lg">
+        <Container h="100%" size="xl">
           <Group justify="space-between" align="center" h="100%">
             <div>
-              <Title order={3}>
-                Simulateur de coût – Nounou en garde partagée
-              </Title>
+              <Title order={3}>Simulateur de coût – Nounou en garde partagée</Title>
               <Text size="sm" c="dimmed">
-                Frontend statique – calculs locaux, règles 2025 paramétrables.
+                Calcule le reste à charge 2025 en respectant les barèmes CAF & impôts.
               </Text>
             </div>
-            <Text size="xs" c="dimmed">
-              Made with React + Vite + Mantine
-            </Text>
+            <Anchor
+              href="https://github.com/tychota"
+              target="_blank"
+              rel="noreferrer"
+              size="sm"
+              c="dimmed"
+            >
+              Vibecoded by Tycho Tatitscheff
+            </Anchor>
           </Group>
         </Container>
       </AppShell.Header>
 
       <AppShell.Main>
-        <Container size="lg" py="md">
+        <Container size="xl" py="md">
           <Layout
             left={<InputsForm value={inputs} onChange={setInputs} />}
-            right={<ResultsSidebar inputs={inputs} result={result} />}
+            right={<ResultsSidebar result={result} />}
           />
-          <Text mt="md" size="xs" c="dimmed" ta="right">
-            ⚠️ Ce simulateur simplifie certains paramètres (taux URSSAF, barèmes
-            CMG, plafonds). Adapte les constantes dans{" "}
-            <code>domain/constants.ts</code> pour coller aux textes officiels.
-          </Text>
-          <Text mt={4} size="xs" c="dimmed" ta="right">
-            Déployable tel quel sur Vercel / GitHub Pages (build statique).
-          </Text>
         </Container>
       </AppShell.Main>
     </AppShell>

@@ -50,8 +50,10 @@ export interface FamilyResult {
 
   annualGrossCostBeforeCMG: number;
   annualCmgTotal: number;
-  annualEligibleExpensesForTaxCredit: number;
-  annualTaxCredit: number;
+  annualNannyNetExpenses: number;
+  annualEligibleExpensesTotal: number;
+  annualTaxCreditTotal: number;
+  annualTaxCreditNanny: number;
   monthlyCostAfterTaxCredit: number;
 
   monthlyResourcesCAF: number;

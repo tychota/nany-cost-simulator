@@ -9,12 +9,12 @@ interface LayoutProps {
 export function Layout({ left, right }: LayoutProps) {
   return (
     <Grid gutter="md" align="stretch">
-      <Grid.Col span={{ base: 12, md: 7 }}>
+      <Grid.Col span={{ base: 12, lg: 5 }}>
         <Paper shadow="sm" p="md" radius="lg" withBorder>
           {left}
         </Paper>
       </Grid.Col>
-      <Grid.Col span={{ base: 12, md: 5 }}>
+      <Grid.Col span={{ base: 12, lg: 7 }}>
         <Paper shadow="sm" p="md" radius="lg" withBorder>
           {right}
         </Paper>

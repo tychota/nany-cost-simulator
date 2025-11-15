@@ -5,15 +5,15 @@ import { FamilyInput, SimulationInputs } from "./types";
  */
 
 // Temps
-export const WEEKS_PER_YEAR = 52; // 52 semaines de référence pour la mensualisation
+export const WEEKS_PER_YEAR = 52; // 52 semaines de référence (mensualisation 52/12)
 export const MONTHS_PER_YEAR = 12;
 
 // Garde partagée / conventions
 export const MAX_WEEKLY_HOURS = 50;
 
 // URSSAF – taux officiels 2025
-export const EMPLOYER_SOCIAL_RATE = 0.474; // ≈47,4 % en additionnant les lignes patronales du tableau Parent Employeur Zen (mise à jour 01/2025)
-export const EMPLOYEE_SOCIAL_RATE = 0.2205; // ≈22,05 % d'après les lignes salariales hors Alsace-Moselle
+export const EMPLOYER_SOCIAL_RATE = 0.474; // ≈47,4 % (Parent Employeur Zen – cotisations 2025)
+export const EMPLOYEE_SOCIAL_RATE = 0.2205; // ≈22,05 % de retenues salariés
 export const EMPLOYER_SOCIAL_DEDUCTION_PER_HOUR = 2; // Déduction forfaitaire (économie.gouv.fr)
 export const HEALTH_CONTRIBUTION_RATE = 0.027; // contribution santé au travail (2,7 %)
 export const HEALTH_CONTRIBUTION_CAP = 5; // plafond mensuel contribution santé au travail (€)
@@ -68,26 +68,24 @@ const DEFAULT_FAMILY_1: FamilyInput = {
   id: "fam1",
   label: "Famille 1",
   share: 0.5,
-  taxableIncome: 60000, // € / an
-  otherHouseholdEmploymentPerYear: 2000,
-  childrenCount: 1,
-  singleParent: false,
-  firstYearEmployment: false,
-};
-
-const DEFAULT_FAMILY_2: FamilyInput = {
-  id: "fam2",
-  label: "Famille 2",
-  share: 0.5,
-  taxableIncome: 35000,
-  otherHouseholdEmploymentPerYear: 1000,
+  taxableIncome: 125000,
+  otherHouseholdEmploymentPerYear: 5000,
   childrenCount: 1,
   singleParent: false,
   firstYearEmployment: false,
 };
 
 export const DEFAULT_INPUTS: SimulationInputs = {
-  netHourlyWage: 11, // €/h
-  weeklyHours: 40,
-  families: [DEFAULT_FAMILY_1, DEFAULT_FAMILY_2],
+  netHourlyWage: 9.5, // €/h
+  weeklyHours: 48,
+  families: [DEFAULT_FAMILY_1],
+};
+
+export const FAMILY_BLUEPRINT = {
+  taxableIncome: 95000,
+  otherHouseholdEmploymentPerYear: 3500,
+  childrenCount: 1,
+  share: 0.5,
+  singleParent: false,
+  firstYearEmployment: false,
 };
