@@ -6,6 +6,7 @@ import { ResultsSidebar } from "./components/ResultsSidebar";
 import { DEFAULT_INPUTS } from "./domain/constants";
 import { SimulationInputs } from "./domain/types";
 import { computeSimulation } from "./domain/calculator";
+import { ReferenceSection } from "./components/Reference";
 
 function App() {
   const [inputs, setInputs] = useState<SimulationInputs>(DEFAULT_INPUTS);
@@ -26,9 +27,12 @@ function App() {
         <Container h="100%" size="xl">
           <Group justify="space-between" align="center" h="100%">
             <div>
-              <Title order={3}>Simulateur de coût – Nounou en garde partagée</Title>
+              <Title order={3}>
+                Simulateur de coût – Nounou en garde partagée
+              </Title>
               <Text size="sm" c="dimmed">
-                Calcule le reste à charge 2025 en respectant les barèmes CAF & impôts.
+                Calcule le reste à charge 2025 en respectant les barèmes CAF &
+                impôts.
               </Text>
             </div>
             <Anchor
@@ -38,7 +42,7 @@ function App() {
               size="sm"
               c="dimmed"
             >
-              Vibecoded by Tycho Tatitscheff
+              Vibecodé by Tycho Tatitscheff
             </Anchor>
           </Group>
         </Container>
@@ -48,6 +52,7 @@ function App() {
         <Container size="xl" py="md">
           <Layout
             left={<InputsForm value={inputs} onChange={setInputs} />}
+            leftbottom={<ReferenceSection />}
             right={<ResultsSidebar result={result} />}
           />
         </Container>

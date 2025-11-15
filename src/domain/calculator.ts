@@ -115,7 +115,8 @@ function computeFamilyResult(
     1
   );
   const cmgRemuneration = eligibleGuardCost * cmgScale;
-  const cmgCotisations = employerChargesAfterDeduction * CMG_COTIS_RATE * cmgScale;
+  const cmgCotisations =
+    employerChargesAfterDeduction * CMG_COTIS_RATE * cmgScale;
   const cmgTotal = cmgCotisations + cmgRemuneration;
 
   const monthlyCostBeforeCMG = monthlyNetShare + employerChargesAfterDeduction;
@@ -135,7 +136,10 @@ function computeFamilyResult(
 
   const taxCreditCap = computeTaxCreditCap(family);
   // Crédit d'impôt 50 % des dépenses (Service-Public) avec plafonds majorés
-  const annualTaxCreditBase = Math.min(annualEligibleExpensesTotal, taxCreditCap);
+  const annualTaxCreditBase = Math.min(
+    annualEligibleExpensesTotal,
+    taxCreditCap
+  );
   const annualTaxCreditTotal = 0.5 * annualTaxCreditBase;
   const creditShare =
     annualEligibleExpensesTotal === 0

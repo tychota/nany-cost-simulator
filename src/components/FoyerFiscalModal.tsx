@@ -32,15 +32,17 @@ export function FoyerFiscalModal({
 
   // Revenus après mariage/PACS
   const [nbPartsCouple, setNbPartsCouple] = useState<number>(2);
-  const [nbEnfants, setNbEnfants] = useState<number>(0);
+  const [nbEnfants, setNbEnfants] = useState<number>(1);
 
   const calculateRFR = () => {
     // Reconstitution approximative du RFR du couple
     // On suppose que le RFR est proportionnel aux parts fiscales
 
     // RFR individuel estimé = revenu déclaré × (parts du couple / parts individuelles)
-    const rfrPerson1Adjusted = revenuPerson1 * (nbPartsCouple / 2) / nbPartsPerson1;
-    const rfrPerson2Adjusted = revenuPerson2 * (nbPartsCouple / 2) / nbPartsPerson2;
+    const rfrPerson1Adjusted =
+      (revenuPerson1 * (nbPartsCouple / 2)) / nbPartsPerson1;
+    const rfrPerson2Adjusted =
+      (revenuPerson2 * (nbPartsCouple / 2)) / nbPartsPerson2;
 
     // On ajuste pour les enfants (0.5 part par enfant pour les 2 premiers, 1 part à partir du 3ème)
     let partsEnfants = 0;
@@ -51,7 +53,9 @@ export function FoyerFiscalModal({
     const totalPartsAvecEnfants = 2 + partsEnfants;
 
     // RFR estimé du couple avec enfants
-    const rfrEstime = (rfrPerson1Adjusted + rfrPerson2Adjusted) * (totalPartsAvecEnfants / nbPartsCouple);
+    const rfrEstime =
+      (rfrPerson1Adjusted + rfrPerson2Adjusted) *
+      (totalPartsAvecEnfants / nbPartsCouple);
 
     return Math.round(rfrEstime);
   };
@@ -98,7 +102,9 @@ export function FoyerFiscalModal({
             min={0}
             step={1000}
             value={revenuPerson1}
-            onChange={(val) => setRevenuPerson1(typeof val === "number" ? val : 0)}
+            onChange={(val) =>
+              setRevenuPerson1(typeof val === "number" ? val : 0)
+            }
           />
           <NumberInput
             label="Nombre de parts fiscales"
@@ -107,7 +113,9 @@ export function FoyerFiscalModal({
             max={5}
             step={0.5}
             value={nbPartsPerson1}
-            onChange={(val) => setNbPartsPerson1(typeof val === "number" ? val : 1)}
+            onChange={(val) =>
+              setNbPartsPerson1(typeof val === "number" ? val : 1)
+            }
           />
         </Stack>
 
@@ -122,7 +130,9 @@ export function FoyerFiscalModal({
             min={0}
             step={1000}
             value={revenuPerson2}
-            onChange={(val) => setRevenuPerson2(typeof val === "number" ? val : 0)}
+            onChange={(val) =>
+              setRevenuPerson2(typeof val === "number" ? val : 0)
+            }
           />
           <NumberInput
             label="Nombre de parts fiscales"
@@ -131,7 +141,9 @@ export function FoyerFiscalModal({
             max={5}
             step={0.5}
             value={nbPartsPerson2}
-            onChange={(val) => setNbPartsPerson2(typeof val === "number" ? val : 1)}
+            onChange={(val) =>
+              setNbPartsPerson2(typeof val === "number" ? val : 1)
+            }
           />
         </Stack>
 
@@ -144,7 +156,9 @@ export function FoyerFiscalModal({
           max={8}
           step={0.5}
           value={nbPartsCouple}
-          onChange={(val) => setNbPartsCouple(typeof val === "number" ? val : 2)}
+          onChange={(val) =>
+            setNbPartsCouple(typeof val === "number" ? val : 2)
+          }
         />
 
         <NumberInput

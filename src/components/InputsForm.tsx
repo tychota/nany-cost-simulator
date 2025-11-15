@@ -99,8 +99,9 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
       <section>
         <Title order={5}>Contrat demandé par la nounou</Title>
         <Text size="sm" c="dimmed" mb="sm">
-          Ces valeurs proviennent directement du contrat ou de la fiche de paie :
-          elles servent à mensualiser les heures (52/12) et à calculer les aides.
+          Ces valeurs proviennent directement du contrat ou de la fiche de paie
+          : elles servent à mensualiser les heures (52/12) et à calculer les
+          aides.
         </Text>
         <SimpleGrid cols={{ base: 1 }} spacing="md">
           <NumberInput
@@ -143,24 +144,13 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
       </section>
 
       <section>
-        <Group justify="space-between" align="flex-start" mb="xs">
-          <div>
-            <Title order={5}>Ressources familiales (CAF & impôts)</Title>
-            <Text size="sm" c="dimmed">
-              Ces montants proviennent de l'avis d'impôt N-2 et de votre
-              déclaration 2042. Ils conditionnent le CMG et le crédit d'impôt.
-            </Text>
-          </div>
-          <Button
-            variant="light"
-            size="xs"
-            leftSection={<IconPlus size={14} />}
-            onClick={handleAddFamily}
-            disabled={value.families.length >= 2}
-          >
-            Ajouter
-          </Button>
-        </Group>
+        <div>
+          <Title order={5}>Ressources familiales (CAF & impôts)</Title>
+          <Text size="sm" c="dimmed">
+            Ces montants proviennent de l'avis d'impôt N-2 et de votre
+            déclaration 2042. Ils conditionnent le CMG et le crédit d'impôt.
+          </Text>
+        </div>
 
         <Tabs
           value={activeFamilyId}
@@ -168,32 +158,51 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
           keepMounted={false}
           variant="outline"
         >
-          <Tabs.List>
-            {value.families.map((fam) => (
-              <Tabs.Tab key={fam.id} value={fam.id}>
-                {fam.label}
-              </Tabs.Tab>
-            ))}
-          </Tabs.List>
+          <Group
+            justify="space-between"
+            align="center"
+            gap="xs"
+            wrap="nowrap"
+            mt="sm"
+          >
+            <div style={{ flex: 1 }}>
+              <Tabs.List>
+                {value.families.map((fam, index) => (
+                  <Tabs.Tab key={fam.id} value={fam.id}>
+                    {fam.label}
+                  </Tabs.Tab>
+                ))}
+              </Tabs.List>
+            </div>
+
+            <Button
+              variant="light"
+              size="xs"
+              color={value.families.length >= 2 ? "red" : undefined}
+              leftSection={
+                value.families.length >= 2 ? (
+                  <IconTrash size={14} />
+                ) : (
+                  <IconPlus size={14} />
+                )
+              }
+              onClick={() => {
+                if (value.families.length >= 2) {
+                  const secondFam = value.families[1];
+                  if (secondFam) handleRemoveFamily(secondFam.id);
+                } else {
+                  handleAddFamily();
+                }
+              }}
+            >
+              {value.families.length >= 2 ? "Supprimer" : "Ajouter"}
+            </Button>
+          </Group>
 
           {value.families.map((fam, index) => (
             <Tabs.Panel key={fam.id} value={fam.id} pt="md">
-              <Paper withBorder radius="md" p="md">
+              <Paper radius="md" p="md">
                 <Stack gap="md">
-                  <Group justify="space-between" align="center">
-                    <Text fw={600}>{fam.label}</Text>
-                    {value.families.length > 1 && (
-                      <Tooltip label="Supprimer ce foyer">
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          onClick={() => handleRemoveFamily(fam.id)}
-                        >
-                          <IconTrash size={14} />
-                        </ActionIcon>
-                      </Tooltip>
-                    )}
-                  </Group>
                   <SimpleGrid cols={{ base: 1 }} spacing="md">
                     <NumberInput
                       label={
@@ -250,65 +259,73 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
                       <Accordion.Panel>
                         <Stack gap="md">
                           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                            <NumberInput
-                              label={
-                                <FieldLabel
-                                  label="Part du salaire supportée"
-                                  info="Répartition contractuelle entre cofamilles (0-100 %)."
-                                />
-                              }
-                              suffix="%"
-                              min={0}
-                              max={100}
-                              step={5}
-                              value={Math.round(fam.share * 1000) / 10}
-                              onChange={(val) =>
-                                updateFamily(index, {
-                                  share:
-                                    typeof val === "number"
-                                      ? val / 100
-                                      : fam.share,
-                                })
-                              }
-                            />
-                            <NumberInput
-                              label={
-                                <FieldLabel
-                                  label="Nombre d'enfants à charge CAF"
-                                  info="Le décret 2025-515 applique un taux d'effort plus favorable quand la fratrie augmente."
-                                />
-                              }
-                              min={0}
-                              max={8}
-                              value={fam.childrenCount}
-                              onChange={(val) =>
-                                updateFamily(index, {
-                                  childrenCount: typeof val === "number" ? val : 0,
-                                })
-                              }
-                            />
+                            <Stack gap={6}>
+                              <FieldLabel
+                                label="Part du salaire supportée"
+                                info="Répartition contractuelle entre cofamilles (0-100 %)."
+                              />
+                              <NumberInput
+                                label={undefined}
+                                suffix="%"
+                                min={0}
+                                max={100}
+                                step={5}
+                                value={Math.round(fam.share * 1000) / 10}
+                                onChange={(val) =>
+                                  updateFamily(index, {
+                                    share:
+                                      typeof val === "number"
+                                        ? val / 100
+                                        : fam.share,
+                                  })
+                                }
+                              />
+                            </Stack>
+                            <Stack gap={6}>
+                              <FieldLabel
+                                label="Nombre d'enfants à charge"
+                                info="Le décret 2025-515 applique un taux d'effort plus favorable quand la fratrie augmente."
+                              />
+                              <NumberInput
+                                label={undefined}
+                                min={0}
+                                max={8}
+                                value={fam.childrenCount}
+                                onChange={(val) =>
+                                  updateFamily(index, {
+                                    childrenCount:
+                                      typeof val === "number" ? val : 0,
+                                  })
+                                }
+                              />
+                            </Stack>
                           </SimpleGrid>
                           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                            <Switch
-                              label="Parent isolé"
-                              description="Donne droit à un CMG jusqu'aux 12 ans de l'enfant."
-                              checked={fam.singleParent}
-                              onChange={(event) =>
-                                updateFamily(index, {
-                                  singleParent: event.currentTarget.checked,
-                                })
-                              }
-                            />
-                            <Switch
-                              label="1re année d'emploi à domicile"
-                              description="Majore le plafond du crédit d'impôt à 15 000 € (18 000 € max)."
-                              checked={fam.firstYearEmployment}
-                              onChange={(event) =>
-                                updateFamily(index, {
-                                  firstYearEmployment: event.currentTarget.checked,
-                                })
-                              }
-                            />
+                            <Stack gap={4}>
+                              <Switch
+                                label="Parent isolé"
+                                description="Donne droit à un CMG jusqu'aux 12 ans de l'enfant."
+                                checked={fam.singleParent}
+                                onChange={(event) =>
+                                  updateFamily(index, {
+                                    singleParent: event.currentTarget.checked,
+                                  })
+                                }
+                              />
+                            </Stack>
+                            <Stack gap={4}>
+                              <Switch
+                                label="1re année d'emploi à domicile"
+                                description="Majore le plafond du crédit d'impôt à 15 000 € (18 000 € max)."
+                                checked={fam.firstYearEmployment}
+                                onChange={(event) =>
+                                  updateFamily(index, {
+                                    firstYearEmployment:
+                                      event.currentTarget.checked,
+                                  })
+                                }
+                              />
+                            </Stack>
                           </SimpleGrid>
                         </Stack>
                       </Accordion.Panel>
