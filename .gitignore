@@ -1,0 +1,30 @@
+# Node
+node_modules/
+dist/
+build/
+out/
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.*.local
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tgz
+
+# pnpm
+.pnpm-store/
+.pnpm-debug.log
+.pnpm/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
