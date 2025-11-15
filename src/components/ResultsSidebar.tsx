@@ -74,7 +74,7 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
   );
 
   return (
-    <Paper withBorder radius="xl" p="lg">
+    <Paper withBorder radius="lg" p="lg">
       <Stack gap="lg">
         <SheetSection
           title="Nounou – synthèse paie"
