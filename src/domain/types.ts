@@ -38,6 +38,7 @@ export interface FamilyResult {
   monthlyHoursShare: number;
 
   employerChargesGross: number;
+  healthContribution: number;
   employerChargesAfterDeduction: number;
 
   cmgCotisations: number;
@@ -54,6 +55,7 @@ export interface FamilyResult {
   monthlyCostAfterTaxCredit: number;
 
   monthlyResourcesCAF: number;
+  effortRate: number;
 }
 
 export interface SimulationResult {

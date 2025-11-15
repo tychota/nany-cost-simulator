@@ -11,10 +11,12 @@ export const MONTHS_PER_YEAR = 12;
 // Garde partagée / conventions
 export const MAX_WEEKLY_HOURS = 50;
 
-// URSSAF – approximations globales (à affiner si besoin)
-export const EMPLOYER_SOCIAL_RATE = 0.42; // % cotisations patronales sur le brut
-export const EMPLOYEE_SOCIAL_RATE = 0.22; // % cotisations salariales sur le brut
+// URSSAF – taux officiels 2025
+export const EMPLOYER_SOCIAL_RATE = 0.45; // % cotisations patronales sur le brut (approximatif, varie selon plafonds)
+export const EMPLOYEE_SOCIAL_RATE = 0.2188; // % cotisations salariales sur le brut (21,88% en 2025)
 export const EMPLOYER_SOCIAL_DEDUCTION_PER_HOUR = 2; // déduction forfaitaire emploi à domicile (€/h)
+export const HEALTH_CONTRIBUTION_RATE = 0.027; // contribution santé au travail (2,7% plafonné à 5€/bulletin)
+export const HEALTH_CONTRIBUTION_CAP = 5; // plafond mensuel contribution santé au travail (€)
 
 // CMG – paramètres 2025 (simplifiés)
 export const CMG_HOURLY_CAP = 15; // plafond horaire nounou à domicile

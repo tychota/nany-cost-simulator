@@ -2,6 +2,8 @@ import {
   EMPLOYEE_SOCIAL_RATE,
   EMPLOYER_SOCIAL_DEDUCTION_PER_HOUR,
   EMPLOYER_SOCIAL_RATE,
+  HEALTH_CONTRIBUTION_RATE,
+  HEALTH_CONTRIBUTION_CAP,
   HOURS_PER_YEAR,
   MONTHS_PER_YEAR,
   CMG_HOURLY_CAP,
@@ -78,11 +80,17 @@ function computeFamilyResult(
   // Cotisations employeur (brutes)
   const employerChargesGross = monthlyGrossShare * EMPLOYER_SOCIAL_RATE;
 
+  // Contribution santé au travail (2,7% plafonné à 5€)
+  const healthContribution = Math.min(
+    monthlyGrossShare * HEALTH_CONTRIBUTION_RATE,
+    HEALTH_CONTRIBUTION_CAP
+  );
+
   // Déduction forfaitaire par heure
   const deduction = EMPLOYER_SOCIAL_DEDUCTION_PER_HOUR * monthlyHoursShare;
   const employerChargesAfterDeduction = Math.max(
     0,
-    employerChargesGross - deduction
+    employerChargesGross + healthContribution - deduction
   );
 
   // CMG "cotisations" – simplifié : 50 % de ces charges (sans plafond mensuel)
@@ -128,6 +136,7 @@ function computeFamilyResult(
     monthlyNetShare,
     monthlyHoursShare,
     employerChargesGross,
+    healthContribution,
     employerChargesAfterDeduction,
     cmgCotisations,
     cmgRemuneration,
@@ -140,6 +149,7 @@ function computeFamilyResult(
     annualTaxCredit,
     monthlyCostAfterTaxCredit,
     monthlyResourcesCAF,
+    effortRate,
   };
 }
 

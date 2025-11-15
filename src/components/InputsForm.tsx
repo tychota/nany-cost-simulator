@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   NumberInput,
   Stack,
@@ -6,8 +7,12 @@ import {
   Divider,
   Group,
   Switch,
+  Button,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { SimulationInputs, FamilyInput } from "../domain/types";
+import { FoyerFiscalModal } from "./FoyerFiscalModal";
 
 interface InputsFormProps {
   value: SimulationInputs;
@@ -15,6 +20,9 @@ interface InputsFormProps {
 }
 
 export function InputsForm({ value, onChange }: InputsFormProps) {
+  const [rfrModalOpened, setRfrModalOpened] = useState(false);
+  const [rfrModalFamilyIndex, setRfrModalFamilyIndex] = useState<number>(0);
+
   const updateGlobal = (patch: Partial<SimulationInputs>) => {
     onChange({ ...value, ...patch });
   };
@@ -23,6 +31,11 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
     const families = [...value.families];
     families[index] = { ...families[index], ...patch };
     onChange({ ...value, families });
+  };
+
+  const openRfrModal = (index: number) => {
+    setRfrModalFamilyIndex(index);
+    setRfrModalOpened(true);
   };
 
   return (
@@ -95,19 +108,28 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
                 })
               }
             />
-            <NumberInput
-              label="RFR annuel (impôt)"
-              description="Revenu fiscal de référence du foyer"
-              suffix=" €"
-              min={0}
-              step={1000}
-              value={fam.taxableIncome}
-              onChange={(val) =>
-                updateFamily(index, {
-                  taxableIncome: typeof val === "number" ? val : 0,
-                })
-              }
-            />
+            <Stack gap={4}>
+              <NumberInput
+                label="RFR annuel (impôt)"
+                description="Revenu fiscal de référence du foyer (N-2)"
+                suffix=" €"
+                min={0}
+                step={1000}
+                value={fam.taxableIncome}
+                onChange={(val) =>
+                  updateFamily(index, {
+                    taxableIncome: typeof val === "number" ? val : 0,
+                  })
+                }
+              />
+              <Button
+                variant="subtle"
+                size="xs"
+                onClick={() => openRfrModal(index)}
+              >
+                Calculer le RFR si vous étiez célibataires avant
+              </Button>
+            </Stack>
           </Group>
 
           <Group grow align="flex-end">
@@ -161,6 +183,15 @@ export function InputsForm({ value, onChange }: InputsFormProps) {
           </Group>
         </Stack>
       ))}
+
+      <FoyerFiscalModal
+        opened={rfrModalOpened}
+        onClose={() => setRfrModalOpened(false)}
+        currentRFR={value.families[rfrModalFamilyIndex]?.taxableIncome}
+        onCalculated={(rfr) => {
+          updateFamily(rfrModalFamilyIndex, { taxableIncome: rfr });
+        }}
+      />
     </Stack>
   );
 }

@@ -44,12 +44,43 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
         <Text size="sm" fw={500}>
           Nounou (contrat global)
         </Text>
-        <Text size="sm">
-          Heures mensualisées :{" "}
-          <Badge variant="light" size="sm">
-            {formatHours(result.hours.monthlyTotal)}
-          </Badge>
-        </Text>
+
+        <Accordion variant="subtle" radius="sm">
+          <Accordion.Item value="mensualisation">
+            <Accordion.Control>
+              <Text size="sm">
+                Heures mensualisées :{" "}
+                <Badge variant="light" size="sm">
+                  {formatHours(result.hours.monthlyTotal)}
+                </Badge>
+              </Text>
+            </Accordion.Control>
+            <Accordion.Panel>
+              <Stack gap={4}>
+                <Text size="xs" c="dimmed">
+                  <strong>Détail de la mensualisation (année complète)</strong>
+                </Text>
+                <Text size="xs">
+                  Heures normales : {formatHours(result.hours.weeklyNormal)}/sem × 52 ÷ 12 = {formatHours(result.hours.monthlyNormal)}/mois
+                </Text>
+                {result.hours.weeklyPlus25 > 0 && (
+                  <Text size="xs">
+                    Heures +25% : {formatHours(result.hours.weeklyPlus25)}/sem × 52 ÷ 12 = {formatHours(result.hours.monthlyPlus25)}/mois
+                  </Text>
+                )}
+                {result.hours.weeklyPlus50 > 0 && (
+                  <Text size="xs">
+                    Heures +50% : {formatHours(result.hours.weeklyPlus50)}/sem × 52 ÷ 12 = {formatHours(result.hours.monthlyPlus50)}/mois
+                  </Text>
+                )}
+                <Text size="xs" fw={500}>
+                  Total : {formatHours(result.hours.monthlyTotal)}/mois
+                </Text>
+              </Stack>
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
+
         <Text size="sm">
           Salaire mensuel brut :{" "}
           <Badge variant="light" size="sm">
@@ -61,6 +92,10 @@ export function ResultsSidebar({ result }: ResultsSidebarProps) {
           <Badge variant="light" size="sm">
             {formatCurrencyDetailed(result.totalNetMonthly)}
           </Badge>
+          {" "}
+          <Text span size="xs" c="dimmed">
+            (cotisations salariales: 21,88%)
+          </Text>
         </Text>
       </Stack>
 
@@ -177,15 +212,46 @@ function FamilyCard({ fam }: FamilyCardProps) {
         </Badge>
       </Text>
 
-      <Text size="sm">
-        CMG total (rémunération + cotisations) :{" "}
-        <Badge variant="light" size="sm" color="blue">
-          {formatCurrencyDetailed(fam.cmgTotal)}{" "}
-        </Badge>{" "}
-        <Text span size="xs" c="dimmed">
-          ({formatPercent(cmgRatio)} du coût brut)
-        </Text>
-      </Text>
+      <Accordion variant="subtle" radius="sm">
+        <Accordion.Item value="cmg">
+          <Accordion.Control>
+            <Text size="sm">
+              CMG total :{" "}
+              <Badge variant="light" size="sm" color="blue">
+                {formatCurrencyDetailed(fam.cmgTotal)}
+              </Badge>{" "}
+              <Text span size="xs" c="dimmed">
+                ({formatPercent(cmgRatio)} du coût brut)
+              </Text>
+            </Text>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Stack gap={4}>
+              <Text size="xs" c="dimmed">
+                <strong>Détail du CMG (formule 2025)</strong>
+              </Text>
+              <Text size="xs">
+                Taux d'effort : {formatPercent(fam.effortRate)} ({fam.family.childrenCount} enfant(s))
+              </Text>
+              <Text size="xs">
+                Part rémunération : {formatCurrencyDetailed(fam.cmgRemuneration)}/mois
+              </Text>
+              <Text size="xs" c="dimmed" style={{ paddingLeft: "1rem" }}>
+                = Coût garde éligible × (1 - (revenu mensuel × taux d'effort ÷ 10,38€))
+              </Text>
+              <Text size="xs">
+                Part cotisations patronales : {formatCurrencyDetailed(fam.cmgCotisations)}/mois
+              </Text>
+              <Text size="xs" c="dimmed" style={{ paddingLeft: "1rem" }}>
+                = 50% des cotisations après déduction (garde à domicile)
+              </Text>
+              <Text size="xs" fw={500}>
+                Total CMG : {formatCurrencyDetailed(fam.cmgTotal)}/mois
+              </Text>
+            </Stack>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
 
       <Text size="sm">
         Coût mensuel après CMG :{" "}
