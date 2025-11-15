@@ -52,10 +52,8 @@ export function FoyerFiscalModal({
 
     const totalPartsAvecEnfants = 2 + partsEnfants;
 
-    // RFR estimé du couple avec enfants
-    const rfrEstime =
-      (rfrPerson1Adjusted + rfrPerson2Adjusted) *
-      (totalPartsAvecEnfants / nbPartsCouple);
+    // RFR estimé du nouveau foyer (les parts enfants influent le quotient familial, pas le RFR)
+    const rfrEstime = rfrPerson1Adjusted + rfrPerson2Adjusted;
 
     return Math.round(rfrEstime);
   };
